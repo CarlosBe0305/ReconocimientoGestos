@@ -7,35 +7,47 @@ from keras.models import load_model
 
 model = load_model('keras_model.h5')
 data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
+#resize the image to a 224x224 with the same strategy as in TM2:
+  #resizing the image to be at least 224x224 and then cropping from the center
 
-st.title("Reconocimiento de Imágenes")
+  #turn the image into a numpy array
 
-img_file_buffer = st.camera_input("Toma una Foto")
 
-if img_file_buffer is not None:
-    # To read image file buffer with OpenCV:
-    data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
-   #To read image file buffer as a PIL Image:
-    img = Image.open(img_file_buffer)
+while True:
+    js_reply = video_frame(label_html, bbox)
+    if not js_reply:
+        break
 
-    newsize = (224, 224)
-    img = img.resize(newsize)
-    # To convert PIL Image to numpy array:
-    img_array = np.array(img)
+    # convert JS response to OpenCV Image
+    img = js_to_image(js_reply["img"])
+    #size = (224, 224)
+    #imag2 = ImagOps.fit(img, size, Imag.ANTIALIAS)
 
-    # Normalize the image
-    normalized_image_array = (img_array.astype(np.float32) / 127.0) - 1
-    # Load the image into the array
+    imag2= cv2.resize(img, (224, 224),
+               interpolation = cv2.INTER_LINEAR)
+
+
+    image_array = np.asarray(imag2)
+  # Normalize the image
+    normalized_image_array = (image_array.astype(np.float32) / 127.0) - 1
+  # Load the image into the array
     data[0] = normalized_image_array
 
-    # run the inference
+  # run the inference
     prediction = model.predict(data)
     print(prediction)
-    if prediction[0][0]>0.5:
-      st.header('Izquierda, con Probabilidad: '+str( prediction[0][0]) )
-    if prediction[0][1]>0.5:
-      st.header('Arriba, con Probabilidad: '+str( prediction[0][1]))
-    if prediction[0][2]>0.5:
-      st.header('Derecha, con Probabilidad: '+str( prediction[0][2]))
 
-
+    if prediction[0][0] >0.6:
+       print('Abierto: ')
+       client1.publish("IMIA","{'gesto': 'Abierto'}",qos=0, retain=False)
+       #sound_file = 'hum_h.wav'
+       #display(Audio(sound_file, autoplay=True))
+       time.sleep(0.5)
+    if prediction[0][1]>0.6:
+       print('Cerrado')
+       client1.publish("IMIA","{'gesto': 'Cerrado'}",qos=0, retain=False)
+       time.sleep(0.5)
+    if prediction[0][2]>0.6:
+       print('Vacío')
+       client1.publish("IMIA","{'gesto': 'Vacío'}",qos=0, retain=False)
+       time.sleep(0.5)
