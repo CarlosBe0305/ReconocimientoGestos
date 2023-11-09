@@ -4,6 +4,7 @@ import numpy as np
 #from PIL import Image, ImageOps #Install pillow instead of PIL
 from PIL import Image as Imag, ImageOps as ImagOps
 import numpy as np
+from PIL import Image, ImageOps
 import time
 from keras.models import load_model
 import paho.mqtt.client as paho
