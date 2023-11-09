@@ -5,3 +5,7 @@ numpy
 opencv-python-headless
 Pillow
 tensorflow
+PIL
+time
+paho
+IPython
