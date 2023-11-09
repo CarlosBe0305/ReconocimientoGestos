@@ -1,9 +1,34 @@
 import streamlit as st
 import cv2
 import numpy as np
-#from PIL import Image
-from PIL import Image as Image, ImageOps as ImagOps
+#from PIL import Image, ImageOps #Install pillow instead of PIL
+from PIL import Image as Imag, ImageOps as ImagOps
+import numpy as np
+import time
 from keras.models import load_model
+import paho.mqtt.client as paho
+from IPython.display import Audio
+
+
+broker="157.230.214.127"
+port=1883
+def on_publish(client,userdata,result):             #create function for callback
+    #print("el dato ha sido publicado \n")
+    pass
+
+
+def on_message(client, userdata, message):
+    global message_received
+    time.sleep(2)
+    message_received=str(message.payload.decode("utf-8"))
+    print(message_received)
+
+
+client1=paho.Client("Python")
+client1.on_publish = on_publish
+client1.subscribe("remote")
+client1.on_message = on_message
+client1.connect(broker,port)
 
 model = load_model('keras_model.h5')
 data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
